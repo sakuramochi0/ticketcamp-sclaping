@@ -14,5 +14,6 @@ scrapy crawl ticketcamp -o prettyrhythm.csv
   ![2017/07/28までに取引されたプリティーリズム/キンプリのチケット総額内訳](https://docs.google.com/spreadsheets/d/1daM1WO5JkqrsLcTQziEpXz5Dx30k2pIp3X35jHU5JYc/pubchart?oid=974114977&format=image)
 
 ## ライセンス
-- GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
-チケット転売問題を解決し、さまざまなイベントの出演者・参加者の利益を守るために、少しでも役に立つことを願っています。
+- [GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007](LICENSE)
+
+チケット転売問題を解決するため、さまざまなイベントの出演者・参加者・運営者の正当な利益を守るために、少しでも役に立つことを願います。
