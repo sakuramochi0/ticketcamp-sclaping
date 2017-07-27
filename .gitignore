@@ -102,3 +102,4 @@ ENV/
 
 # For ticketcamp-scalping
 *.csv
+*.jl
