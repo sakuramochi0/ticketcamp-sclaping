@@ -30,12 +30,47 @@ class TicketcampSpider(scrapy.Spider):
             data['event_id'] = m.group(1)
             data['ticket_id'] = m.group(2)
             data['event_group_name'] = t.css('.h a::text').extract_first().strip()
-            # チケット枚数は「n枚」と「n〜m枚」の場合がある。
-            # 後者の場合はバラ売りが可能であることを示しているだけで、
-            # 実質的にm枚販売していることになるので、m枚と見なすことにする
+
+            # チケット枚数を取得
+            #   チケット枚数は「n枚」と「n〜m枚」の場合がある。
+            #   後者の場合はバラ売りが可能であることを示しているだけで、
+            #   実質的にm枚販売していることになるので、m枚と見なすことにする
             ticket_num = t.css('.ticket-num').extract_first()
             data['ticket_num'] = int(re.search(r'〜?(\d+)', ticket_num).group(0))
+
+            # 価格と追加価格を取得
             data['price'] = int(t.css('.ticket-price::attr(data-price)').extract_first())
+            extra_price = t.css('.price span.text-strong::text')
+            if extra_price:
+                extra_price = extra_price.extract()[1].strip().replace(',', '')
+                data['extra_price'] = int(re.search(r'\d+', extra_price).group(0))
+            else:
+                data['extra_price'] = 0
+            data['total_price'] = data['price'] * data['ticket_num'] + data['extra_price']
+
+            # チケットキャンプが得る手数料を計算
+            # ref. https://ticketcamp.net/guide/payment/
+
+            # 取引手数料を計算
+            transaction_fee_rate = 0.0864
+            transaction_fee = max(data['total_price'] * 0.086, 690)
+
+            # 決済システム料を計算
+            if data['total_price'] <= 10000:
+                system_fee = 324
+            elif data['total_price'] <= 20000:
+                system_fee = 540
+            else:
+                system_fee = data['total_price'] * 0.0324
+
+            data['ticketcamp_fee'] = int(transaction_fee + system_fee)
+
+            # 取引状態を取得
+            state = ''.join(t.css('.watch ::text').extract()).strip()
+            if '取引中' in state or '取引完了' in state:
+                data['state'] = state
+            else:
+                data['state'] = '出品中'
 
             # チケット詳細ページの URL を取得して移動する
             request = scrapy.Request(data['url'], self.parse_ticket)
